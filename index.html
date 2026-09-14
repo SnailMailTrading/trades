@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SnailMail Trades</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #c0d5b5;
+    --card: #ffffff;
+    --border: #dfe8d4;
+    --text: #313a2c;
+    --muted: #7c8873;
+    --accent: #9dc088;
+    --accent-deep: #7aa869;
+    --metadata-bg: #f2f5ed;
+  }
+  body {
+    font-family: 'Lora', Georgia, 'Times New Roman', serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 24px 16px 64px;
+  }
+  .container-narrow {
+    max-width: 780px;
+    margin: 0 auto;
+  }
+  h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    text-align: center;
+    letter-spacing: 0.01em;
+  }
+  .controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .controls .search-wrap {
+    flex: 1 1 220px;
+  }
+  .controls select {
+    flex: 0 0 auto;
+    width: auto;
+  }
+  .category-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 18px;
+  }
+  .cat-filter-pill {
+    cursor: pointer;
+    user-select: none;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--muted);
+    font-size: 0.78rem;
+    padding: 4px 12px;
+    border-radius: 999px;
+    transition: all 0.15s ease;
+  }
+  .cat-filter-pill.active {
+    background: var(--accent-deep);
+    border-color: var(--accent-deep);
+    color: #fff;
+  }
+  .row-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 10px;
+    overflow: hidden;
+    transition: box-shadow 0.15s ease;
+  }
+  .row-card:hover {
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  }
+  .row-header {
+    display: flex;
+    align-items: center;
+    padding: 14px 16px;
+    cursor: pointer;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .row-header .title-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+  }
+  .row-header .title {
+    font-weight: 600;
+    font-size: 0.98rem;
+  }
+  .pill {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 2px 10px;
+    border-radius: 999px;
+    white-space: nowrap;
+    border: 1px solid rgba(0,0,0,0.05);
+  }
+  .pills-row {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+    margin-top: 6px;
+  }
+  .row-header .version-count {
+    font-size: 0.78rem;
+    color: var(--muted);
+    white-space: nowrap;
+    margin-left: auto;
+    background: #ffe0f8;
+    border: 1px solid var(--border);
+    padding: 2px 10px;
+    border-radius: 999px;
+  }
+  .chevron {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    transition: transform 0.2s ease;
+    color: var(--muted);
+  }
+  .row-card.open .chevron {
+    transform: rotate(180deg);
+  }
+  .row-details {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.25s ease, padding 0.25s ease;
+    padding: 0 16px;
+    border-top: 1px solid transparent;
+  }
+  .row-card.open .row-details {
+    padding: 4px 16px 16px;
+    border-top: 1px solid var(--border);
+  }
+  .version-heading {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-top: 14px;
+  }
+  .version-block:first-child .version-heading {
+    margin-top: 4px;
+  }
+  .version-divider {
+    border: none;
+    border-top: 1px dashed var(--border);
+    margin: 14px 0 0;
+  }
+  .metadata-section {
+    margin-top: 10px;
+    background: var(--metadata-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+  }
+  .metadata-section .detail-label {
+    margin-bottom: 6px;
+  }
+  .metadata-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 22px;
+  }
+  .metadata-item {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+  .metadata-key {
+    font-size: 0.66rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--muted);
+  }
+  .metadata-val {
+    font-size: 0.88rem;
+    color: var(--text);
+  }
+  .metadata-val a {
+    color: var(--accent-deep);
+  }
+  .detail-block {
+    margin-top: 10px;
+  }
+  .detail-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--accent-deep);
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .detail-text {
+    font-size: 0.92rem;
+    line-height: 1.5;
+    white-space: pre-wrap;
+  }
+  .empty-state {
+    text-align: center;
+    color: var(--muted);
+    padding: 40px 0;
+    font-size: 0.9rem;
+  }
+  .result-count {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+  .list-description {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 18px;
+    font-size: 0.92rem;
+    line-height: 1.5;
+    color: var(--text);
+  }
+  .data-fallback-notice {
+    background: #f7efd0;
+    border: 1px solid #e0d29a;
+    color: #8a7a2f;
+    font-size: 0.82rem;
+    padding: 8px 12px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+  }
+  .data-fallback-notice code {
+    background: rgba(0,0,0,0.06);
+    padding: 1px 5px;
+    border-radius: 4px;
+  }
+  .form-control, .form-select {
+    font-family: 'Lora', Georgia, serif;
+    border-color: var(--border);
+    background: var(--card);
+    color: var(--text);
+  }
+  .form-control:focus, .form-select:focus {
+    border-color: var(--accent-deep);
+    box-shadow: 0 0 0 0.2rem rgba(122, 168, 105, 0.2);
+  }
+  .add-to-cart-btn {
+    margin-top: 10px;
+    font-family: 'Lora', Georgia, serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--accent-deep);
+    background: var(--card);
+    color: var(--accent-deep);
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .add-to-cart-btn:hover {
+    background: var(--accent-deep);
+    color: #fff;
+  }
+  .add-to-cart-btn.added {
+    background: var(--accent-deep);
+    color: #fff;
+    border-color: var(--accent-deep);
+  }
+  .cart-toggle-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1001;
+    font-family: 'Lora', Georgia, serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    background: var(--accent-deep);
+    color: #fff;
+    border: none;
+    padding: 9px 16px;
+    border-radius: 999px;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .cart-count-badge {
+    background: rgba(255,255,255,0.25);
+    padding: 1px 8px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+  }
+  .back-to-top-btn {
+    position: fixed;
+    bottom: 24px;
+    right: 20px;
+    z-index: 1000;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: none;
+    background: var(--accent-deep);
+    color: #fff;
+    font-size: 1.3rem;
+    line-height: 1;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transform: translateY(8px);
+    pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+  .back-to-top-btn.visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  .back-to-top-btn:hover {
+    background: #6a9758;
+  }
+  .cart-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.25);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    z-index: 1002;
+  }
+  .cart-overlay.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .cart-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100vh;
+    width: 320px;
+    max-width: 85vw;
+    background: var(--card);
+    border-left: 1px solid var(--border);
+    box-shadow: -4px 0 16px rgba(0,0,0,0.12);
+    transform: translateX(100%);
+    transition: transform 0.25s ease;
+    z-index: 1003;
+    display: flex;
+    flex-direction: column;
+  }
+  .cart-panel.open {
+    transform: translateX(0);
+  }
+  .cart-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 18px;
+    border-bottom: 1px solid var(--border);
+  }
+  .cart-panel-header h2 {
+    font-size: 1.1rem;
+    margin: 0;
+  }
+  .cart-close-btn {
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    line-height: 1;
+    color: var(--muted);
+    cursor: pointer;
+    padding: 0 4px;
+  }
+  .cart-items {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px 18px;
+  }
+  .cart-item {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .cart-item-main {
+    flex: 1;
+    min-width: 0;
+  }
+  .cart-item-title {
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+  .cart-item-sub {
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+  .cart-item-remove {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 1.2rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0 4px;
+    flex-shrink: 0;
+  }
+  .cart-item-remove:hover {
+    color: #8a3535;
+  }
+  .cart-panel-footer {
+    padding: 14px 18px;
+    border-top: 1px solid var(--border);
+  }
+  .btn-copy-cart {
+    width: 100%;
+    font-family: 'Lora', Georgia, serif;
+    font-size: 0.92rem;
+    font-weight: 600;
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    background: var(--accent-deep);
+    color: #fff;
+    cursor: pointer;
+  }
+  .btn-copy-cart:hover {
+    background: #6a9758;
+  }
+</style>
+</head>
+<body>
+<div class="container-narrow">
+  <h1>SnailMail's Trading List</h1>
+
+  <div class="list-description" id="listDescription">
+    <!-- Text here -->
+    <p style="text-align: center;"> RULES + INFO <br><br>
+
+     EMAIL: Mailsnail27@gmail.com <br><br></p>
+
+    - I'm still new! Please be patient as I find my footing, and don't hesitate to correct me on anything <br>
+    - Email is currently the best place to reach me. I'm usually pretty quick to respond but please don't spam me <br>
+    - I usually use Mega (very rarely Google Drive), but I will accept links from any platform <br>
+    - My links will stay active for about a week, just let me know if you need more time <br>
+      - This means please be sure to download them for yourself, do not reuse my links <br>
+  </div>
+
+  <div class="controls">
+    <div class="search-wrap">
+      <input type="text" id="searchInput" class="form-control" placeholder="Search show, cast, notes...">
+    </div>
+    <select id="sortSelect" class="form-select">
+      <option value="title-asc" selected>Show (A-Z)</option>
+      <option value="title-desc">Show (Z-A)</option>
+      <option value="date-desc">Date (newest first)</option>
+      <option value="date-asc">Date (oldest first)</option>
+    </select>
+  </div>
+
+  <div class="category-filters" id="categoryFilters"></div>
+
+  <div class="result-count" id="resultCount"></div>
+  <div id="list"></div>
+</div>
+
+<button id="cartToggleBtn" class="cart-toggle-btn" aria-label="Open cart">
+  Cart <span id="cartCount" class="cart-count-badge">0</span>
+</button>
+
+<button id="backToTopBtn" class="back-to-top-btn" aria-label="Back to top">&uarr;</button>
+
+<div id="cartOverlay" class="cart-overlay"></div>
+<div id="cartPanel" class="cart-panel">
+  <div class="cart-panel-header">
+    <h2>Cart</h2>
+    <button id="cartCloseBtn" class="cart-close-btn" aria-label="Close cart">&times;</button>
+  </div>
+  <div id="cartItems" class="cart-items"></div>
+  <div class="cart-panel-footer">
+    <button id="copyCartBtn" class="btn-copy-cart">Copy Cart</button>
+  </div>
+</div>
+
+<script>
+ 
+  const CSV_FILE_PATH = 'data.csv';
+
+  const EXAMPLE_CSV_DATA = `Audio / Video,Show,Tour,Date,Matinée / Evening,Master,Cast,Master Notes,Trading Notes,NFT Date,NFT Forever,Not For Sale,Gifting Status,Limited Trade Status,Type,Release Format,Trader Format,My Notes,Amount Recorded,Venue,City,Collected,Link
+"Audio","Hamilton","Angelica Tour","Jan 05, 2020","Evening","AUD1","Original Broadway Cast","Clear soundboard pull, minor crowd noise in Act 2.","Trades well, high demand.","2020-01-20","TRUE","","Gift at your Discretion","Unrestricted","Bootleg","FLAC","FLAC","Personal favorite recording of this tour.","Full Show","Richard Rodgers Theatre","New York, NY","2020-01-10","https://example.com/hamilton-aud1"
+"Video","Hamilton","Angelica Tour","Jan 05, 2020","Evening","VID1","Original Broadway Cast","Distant handheld shot, decent audio sync.","Limited copies in circulation.","","FALSE","NFS","Never Gift","Unrestricted","Bootleg","MP4","MP4","","Highlights","Richard Rodgers Theatre","New York, NY","2020-02-01",""
+"Audio","Wicked","National Tour","Mar 12, 2021","Matinée","AUD3","National Tour Cast","Taped from mezzanine, good balance.","","2021-03-25","FALSE","","Gift at your Discretion","Unrestricted","Pro-Shot","WAV","MP3","","Full Show","Gershwin Theatre","New York, NY","2021-03-15",""
+`;
+
+  function parseCsvRows(text) {
+    const rows = [];
+    let field = '', row = [], inQuotes = false, i = 0;
+    const len = text.length;
+    while (i < len) {
+      const char = text[i];
+      if (inQuotes) {
+        if (char === '"') {
+          if (text[i + 1] === '"') { field += '"'; i += 2; continue; }
+          inQuotes = false; i++; continue;
+        }
+        field += char; i++; continue;
+      }
+      if (char === '"') { inQuotes = true; i++; continue; }
+      if (char === ',') { row.push(field); field = ''; i++; continue; }
+      if (char === '\r') { i++; continue; }
+      if (char === '\n') { row.push(field); rows.push(row); row = []; field = ''; i++; continue; }
+      field += char; i++;
+    }
+    if (field.length || row.length) { row.push(field); rows.push(row); }
+    return rows.filter(r => !(r.length === 1 && r[0].trim() === ''));
+  }
+
+  function csvToObjects(text) {
+    const rows = parseCsvRows(text);
+    if (!rows.length) return [];
+    const headers = rows[0].map(h => h.trim());
+    return rows.slice(1).map(r => {
+      const obj = {};
+      headers.forEach((h, idx) => { obj[h] = (r[idx] !== undefined ? r[idx].trim() : ''); });
+      return obj;
+    });
+  }
+
+  function parseBool(val) {
+    return String(val).trim().toUpperCase() === 'TRUE';
+  }
+
+  function toSortableDate(dateStr) {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+
+  function rowToVersion(flat) {
+    return {
+      audioVideo: flat['Audio / Video'] || '',
+      tour: flat['Tour'] || '',
+      date: flat['Date'] || '',
+      dateSort: toSortableDate(flat['Date']),
+      session: flat['Matinée / Evening'] || '',
+      master: flat['Master'] || '',
+      cast: flat['Cast'] || '',
+      masterNotes: flat['Master Notes'] || '',
+      tradingNotes: flat['Trading Notes'] || '',
+      nftDate: flat['NFT Date'] || '',
+      nftForever: parseBool(flat['NFT Forever']),
+      notForSale: (flat['Not For Sale'] || '').trim(),
+      giftingStatus: flat['Gifting Status'] || '',
+      limitedTradeStatus: flat['Limited Trade Status'] || '',
+      type: flat['Type'] || '',
+      releaseFormat: flat['Release Format'] || '',
+      traderFormat: flat['Trader Format'] || '',
+      myNotes: flat['My Notes'] || '',
+      amountRecorded: flat['Amount Recorded'] || '',
+      venue: flat['Venue'] || '',
+      city: flat['City'] || '',
+      collected: flat['Collected'] || '',
+      link: flat['Link'] || ''
+    };
+  }
+
+  function groupRowsByShow(flatRows) {
+    const order = [];
+    const map = new Map();
+    flatRows.forEach(flat => {
+      const title = flat['Show'] || '';
+      if (!map.has(title)) { map.set(title, []); order.push(title); }
+      map.get(title).push(rowToVersion(flat));
+    });
+    return order.map(title => ({ title, versions: map.get(title) }));
+  }
+
+  let data = [];
+
+  const TAG_COLORS = {
+    "Audio":                    { bg: '#eaf3e1', text: '#4c6b3d' },
+    "Video":                    { bg: '#e4eef6', text: '#3d6b8a' },
+    "Bootleg":                  { bg: '#f6e6d8', text: '#8a5a34' },
+    "Pro-Shot":                 { bg: '#f3e6ef', text: '#7a4a6e' },
+    "Matinée":                  { bg: '#f7efd0', text: '#8a7a2f' },
+    "Evening":                  { bg: '#e9e4f3', text: '#5f4a8a' },
+    "Unknown":                  { bg: '#e8e8e4', text: '#5a5a56' },
+    "Highlights":               { bg: '#dcf0e8', text: '#2f7a5f' },
+    "Full Show":                { bg: '#f0e0e0', text: '#8a4a4a' },
+    "NFT Forever":              { bg: '#dcecf0', text: '#2f6b7a' },
+    "Not For Sale":             { bg: '#f9d9d9', text: '#8a3535' },
+    "Gift at your Discretion":  { bg: '#f5e9d0', text: '#8a6a2f' },
+    "Never Gift":               { bg: '#f0d9e6', text: '#8a3d63' },
+    "Unrestricted":             { bg: '#e0e8f0', text: '#3d5a7a' }
+  };
+  const FALLBACK_COLOR = { bg: '#e8e8e4', text: '#5a5a56' };
+
+  function colorForTag(tag) {
+    return TAG_COLORS[tag] || FALLBACK_COLOR;
+  }
+
+  function versionTags(version) {
+    const tags = [];
+    if (version.audioVideo) tags.push(version.audioVideo);
+    if (version.type) tags.push(version.type);
+    if (version.amountRecorded) tags.push(version.amountRecorded);
+    if (version.nftForever) tags.push('NFT Forever');
+    if (version.notForSale === 'NFS') tags.push('Not For Sale');
+    if (version.giftingStatus) tags.push(version.giftingStatus);
+    if (version.limitedTradeStatus) tags.push(version.limitedTradeStatus);
+    return tags;
+  }
+
+  const listEl = document.getElementById('list');
+  const searchInput = document.getElementById('searchInput');
+  const sortSelect = document.getElementById('sortSelect');
+  const categoryFiltersEl = document.getElementById('categoryFilters');
+  const resultCountEl = document.getElementById('resultCount');
+
+  let activeCategories = new Set();
+
+  const FILTER_EXCLUDED_TAGS = new Set(['Matinée', 'Evening', 'Unknown']);
+
+  function allTags() {
+    const set = new Set();
+    data.forEach(row => (row.versions || []).forEach(v => versionTags(v).forEach(t => {
+      if (!FILTER_EXCLUDED_TAGS.has(t)) set.add(t);
+    })));
+    return Array.from(set).sort();
+  }
+
+  function renderCategoryFilters() {
+    const tags = allTags();
+    categoryFiltersEl.innerHTML = '';
+    tags.forEach(tag => {
+      const pill = document.createElement('span');
+      pill.className = 'cat-filter-pill';
+      pill.textContent = tag;
+      pill.dataset.cat = tag;
+      pill.addEventListener('click', () => {
+        if (activeCategories.has(tag)) {
+          activeCategories.delete(tag);
+        } else {
+          activeCategories.add(tag);
+        }
+        update();
+      });
+      categoryFiltersEl.appendChild(pill);
+    });
+  }
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+  
+  function escapeAttr(str) {
+    return escapeHtml(str).replace(/"/g, '&quot;');
+  }
+
+  function sortedVersions(row) {
+    return (row.versions || []).slice().sort((a, b) => (b.dateSort || '').localeCompare(a.dateSort || ''));
+  }
+ 
+  function latestDateSort(row) {
+    const versions = sortedVersions(row);
+    return versions.length ? versions[0].dateSort : '';
+  }
+
+  function getFilteredSorted() {
+    const q = searchInput.value.trim().toLowerCase();
+    let rows = data.filter(row => {
+      const rowTags = new Set();
+      (row.versions || []).forEach(v => versionTags(v).forEach(t => rowTags.add(t)));
+      if (activeCategories.size > 0) {
+        const hasMatch = Array.from(rowTags).some(t => activeCategories.has(t));
+        if (!hasMatch) return false;
+      }
+      if (!q) return true;
+      const versionText = (row.versions || [])
+        .map(v => [
+          v.master, v.tour, v.date, v.cast, v.masterNotes, v.tradingNotes,
+          v.myNotes, v.releaseFormat, v.traderFormat, v.venue, v.city,
+          versionTags(v).join(' ')
+        ].join(' '))
+        .join(' ');
+      const haystack = [row.title, versionText].join(' ').toLowerCase();
+      return haystack.includes(q);
+    });
+
+    const sortVal = sortSelect.value;
+    rows = rows.slice().sort((a, b) => {
+      if (sortVal === 'date-desc') return latestDateSort(b).localeCompare(latestDateSort(a));
+      if (sortVal === 'date-asc') return latestDateSort(a).localeCompare(latestDateSort(b));
+      if (sortVal === 'title-asc') return (a.title || '').localeCompare(b.title || '');
+      if (sortVal === 'title-desc') return (b.title || '').localeCompare(a.title || '');
+      return 0;
+    });
+    return rows;
+  }
+
+  function renderVersionDetails(rowTitle, version, index, total) {
+    const tags = versionTags(version);
+    const pillsHtml = tags
+      .map(t => {
+        const col = colorForTag(t);
+        return `<span class="pill" style="background:${col.bg};color:${col.text}">${escapeHtml(t)}</span>`;
+      })
+      .join('');
+
+    const versionHeader = version.master
+      ? `<div class="version-heading">${escapeHtml(version.master)}</div>`
+      : '';
+
+    const metadataItems = [];
+    if (version.date) metadataItems.push({ label: 'Date', value: version.date });
+    if (version.audioVideo) metadataItems.push({ label: 'Audio / Video', value: version.audioVideo });
+    if (version.type) metadataItems.push({ label: 'Type', value: version.type });
+    if (version.session) metadataItems.push({ label: 'Matinée / Evening', value: version.session });
+    if (version.amountRecorded) metadataItems.push({ label: 'Amount Recorded', value: version.amountRecorded });
+    if (version.venue) metadataItems.push({ label: 'Venue', value: version.venue });
+    if (version.city) metadataItems.push({ label: 'City', value: version.city });
+    if (version.tour) metadataItems.push({ label: 'Tour', value: version.tour });
+    if (version.releaseFormat) metadataItems.push({ label: 'Release Format', value: version.releaseFormat });
+    if (version.traderFormat) metadataItems.push({ label: 'Trader Format', value: version.traderFormat });
+    if (version.nftDate) metadataItems.push({ label: 'NFT Date', value: version.nftDate });
+    metadataItems.push({ label: 'NFT Forever', value: version.nftForever ? 'Yes' : 'No' });
+    metadataItems.push({ label: 'Not For Sale', value: version.notForSale === 'NFS' ? 'Yes' : 'No' });
+    if (version.giftingStatus) metadataItems.push({ label: 'Gifting Status', value: version.giftingStatus });
+    if (version.limitedTradeStatus) metadataItems.push({ label: 'Limited Trade Status', value: version.limitedTradeStatus });
+    if (version.collected) metadataItems.push({ label: 'Collected', value: version.collected });
+    if (version.link) {
+      const isHttp = /^https?:\/\//i.test(version.link);
+      metadataItems.push({
+        label: 'Link',
+        value: isHttp
+          ? `<a href="${escapeHtml(version.link)}" target="_blank" rel="noopener noreferrer">${escapeHtml(version.link)}</a>`
+          : escapeHtml(version.link),
+        raw: true
+      });
+    }
+
+    const metadataHtml = metadataItems.length
+      ? `
+        <div class="metadata-section">
+          <div class="detail-label">Metadata</div>
+          <div class="metadata-grid">
+            ${metadataItems.map(m => `
+              <div class="metadata-item">
+                <span class="metadata-key">${escapeHtml(m.label)}</span>
+                <span class="metadata-val">${m.raw ? m.value : escapeHtml(String(m.value))}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `
+      : '';
+
+    const notesBlocks = [
+      { label: 'Cast', value: version.cast },
+      { label: 'Master Notes', value: version.masterNotes },
+      { label: 'Trading Notes', value: version.tradingNotes },
+      { label: 'My Notes', value: version.myNotes }
+    ].filter(n => n.value);
+
+    const notesHtml = notesBlocks.map(n => `
+      <div class="detail-block">
+        <div class="detail-label">${escapeHtml(n.label)}</div>
+        <div class="detail-text">${escapeHtml(n.value)}</div>
+      </div>
+    `).join('');
+
+    const cartButtonHtml = `
+      <button class="add-to-cart-btn"
+        data-title="${escapeAttr(rowTitle || '')}"
+        data-tour="${escapeAttr(version.tour || '')}"
+        data-date="${escapeAttr(version.date || '')}"
+        data-master="${escapeAttr(version.master || '')}"
+        data-av="${escapeAttr(version.audioVideo || '')}">
+        + Add to Cart
+      </button>
+    `;
+
+    return `
+      <div class="version-block">
+        ${versionHeader}
+        ${pillsHtml ? `<div class="pills-row">${pillsHtml}</div>` : ''}
+        ${metadataHtml}
+        ${notesHtml}
+        ${cartButtonHtml}
+      </div>
+    `;
+  }
+
+  function render(rows) {
+    listEl.innerHTML = '';
+    resultCountEl.textContent = `${rows.length} item${rows.length === 1 ? '' : 's'}`;
+    if (!rows.length) {
+      listEl.innerHTML = '<div class="empty-state">No items match your search/filter.</div>';
+      return;
+    }
+    rows.forEach((row) => {
+      const versions = sortedVersions(row);
+      const card = document.createElement('div');
+      card.className = 'row-card';
+
+      const versionsHtml = versions
+        .map((v, i) => renderVersionDetails(row.title, v, i, versions.length))
+        .join(versions.length > 1 ? '<hr class="version-divider">' : '');
+
+      card.innerHTML = `
+        <div class="row-header">
+          <div class="title-wrap">
+            <div class="title">${escapeHtml(row.title || '')}</div>
+          </div>
+          <div class="version-count">${versions.length} version${versions.length === 1 ? '' : 's'}</div>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M6 9l6 6 6-6"/>
+          </svg>
+        </div>
+        <div class="row-details">
+          <div class="version-content">${versionsHtml}</div>
+        </div>
+      `;
+
+      card.querySelector('.row-header').addEventListener('click', () => {
+        const isOpen = card.classList.toggle('open');
+        const details = card.querySelector('.row-details');
+        if (isOpen) {
+          // Measure actual content height so long/many-version cards never get clipped.
+          details.style.maxHeight = details.scrollHeight + 'px';
+        } else {
+          details.style.maxHeight = '0px';
+        }
+      });
+
+      card.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          addToCart({
+            title: btn.dataset.title,
+            tour: btn.dataset.tour,
+            date: btn.dataset.date,
+            master: btn.dataset.master,
+            audioVideo: btn.dataset.av
+          });
+          btn.textContent = 'Added ✓';
+          btn.classList.add('added');
+          setTimeout(() => {
+            btn.textContent = '+ Add to Cart';
+            btn.classList.remove('added');
+          }, 1200);
+        });
+      });
+
+      listEl.appendChild(card);
+    });
+  }
+
+  function update() {
+    // reflect active state on filter pills
+    Array.from(categoryFiltersEl.children).forEach(pill => {
+      pill.classList.toggle('active', activeCategories.has(pill.dataset.cat));
+    });
+    render(getFilteredSorted());
+  }
+
+  searchInput.addEventListener('input', update);
+  sortSelect.addEventListener('change', update);
+
+
+  let cart = [];
+
+  const cartToggleBtn = document.getElementById('cartToggleBtn');
+  const cartCloseBtn = document.getElementById('cartCloseBtn');
+  const cartOverlay = document.getElementById('cartOverlay');
+  const cartPanel = document.getElementById('cartPanel');
+  const cartItemsEl = document.getElementById('cartItems');
+  const cartCountEl = document.getElementById('cartCount');
+  const copyCartBtn = document.getElementById('copyCartBtn');
+
+  function cartItemKey(item) {
+    return [item.title, item.master, item.date].join('||');
+  }
+
+  function addToCart(item) {
+    const key = cartItemKey(item);
+    if (cart.some(c => cartItemKey(c) === key)) return;
+    cart.push(item);
+    renderCart();
+  }
+
+  function removeFromCart(index) {
+    cart.splice(index, 1);
+    renderCart();
+  }
+
+  function renderCart() {
+    cartCountEl.textContent = cart.length;
+    if (!cart.length) {
+      cartItemsEl.innerHTML = '<div class="empty-state">Cart is empty.</div>';
+      return;
+    }
+    cartItemsEl.innerHTML = cart.map((item, idx) => `
+      <div class="cart-item">
+        <div class="cart-item-main">
+          <div class="cart-item-title">${escapeHtml(item.title || '')}</div>
+          <div class="cart-item-sub">${[item.tour, item.date].filter(Boolean).map(escapeHtml).join(' &middot; ')}</div>
+          <div class="cart-item-sub">${[item.master, item.audioVideo].filter(Boolean).map(escapeHtml).join(' &middot; ')}</div>
+        </div>
+        <button class="cart-item-remove" data-idx="${idx}" aria-label="Remove from cart">&times;</button>
+      </div>
+    `).join('');
+    cartItemsEl.querySelectorAll('.cart-item-remove').forEach(btn => {
+      btn.addEventListener('click', () => removeFromCart(parseInt(btn.dataset.idx, 10)));
+    });
+  }
+
+  function openCart() {
+    cartPanel.classList.add('open');
+    cartOverlay.classList.add('open');
+  }
+  function closeCart() {
+    cartPanel.classList.remove('open');
+    cartOverlay.classList.remove('open');
+  }
+
+  cartToggleBtn.addEventListener('click', openCart);
+  cartCloseBtn.addEventListener('click', closeCart);
+  cartOverlay.addEventListener('click', closeCart);
+
+  copyCartBtn.addEventListener('click', () => {
+    if (!cart.length) return;
+    const text = cart
+      .map(item => [item.title, item.tour, item.date, item.master, item.audioVideo]
+        .map(v => v || '—')
+        .join(' | '))
+      .join('\n');
+    const done = () => {
+      const original = copyCartBtn.textContent;
+      copyCartBtn.textContent = 'Copied!';
+      setTimeout(() => { copyCartBtn.textContent = original; }, 1500);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(() => {
+        copyCartBtn.textContent = 'Copy failed';
+        setTimeout(() => { copyCartBtn.textContent = 'Copy Cart'; }, 1500);
+      });
+    } else {
+     
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      try { document.execCommand('copy'); done(); } catch (e) { /* no-op */ }
+      document.body.removeChild(textarea);
+    }
+  });
+
+  renderCart();
+
+  // ---------------------------------------------------------------
+  // BACK TO TOP
+  // ---------------------------------------------------------------
+  const backToTopBtn = document.getElementById('backToTopBtn');
+  window.addEventListener('scroll', () => {
+    backToTopBtn.classList.toggle('visible', window.scrollY > 300);
+  });
+  backToTopBtn.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  function loadData() {
+    listEl.innerHTML = '<div class="empty-state">Loading data&hellip;</div>';
+    fetch(CSV_FILE_PATH)
+      .then(res => {
+        if (!res.ok) throw new Error(`${CSV_FILE_PATH} responded with status ${res.status}`);
+        return res.text();
+      })
+      .then(text => {
+        data = groupRowsByShow(csvToObjects(text));
+        renderCategoryFilters();
+        update();
+      })
+      .catch(err => {
+        console.warn(`Couldn't load ${CSV_FILE_PATH}, falling back to example data:`, err.message);
+        data = groupRowsByShow(csvToObjects(EXAMPLE_CSV_DATA));
+        renderCategoryFilters();
+        update();
+        const notice = document.createElement('div');
+        notice.className = 'data-fallback-notice';
+        notice.innerHTML = `Showing example data — couldn't load <code>${escapeHtml(CSV_FILE_PATH)}</code> (${escapeHtml(err.message)}).`;
+        listEl.parentNode.insertBefore(notice, listEl);
+      });
+  }
+
+  loadData();
+</script>
+
+</body>
+</html>
